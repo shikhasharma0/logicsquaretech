@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>California Cafe Directory</title>
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12" id="header-wrapper">
+        <div class="container">
+          <div class="row">
+            <div class="col-12" id="header">
+              <h2>California Cafe Directory</h2>
+            </div>
+            <div class="col-12" id="search-wrapper">
+              <input type="text" placeholder="Search your favorite cafes!" id="input" onkeyup="search()">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="row">
+          <div class="col-12" id="table-wrapper">
+            <table>
+              <thead>
+                <tr class="table100-head">
+                  <th class="column1">S No</th>
+                  <th class="column2">Cafe Name</th>
+                  <th class="column3">Address</th>
+                  <th class="column4">Postal Code</th>
+                  <th class="column5">Lat</th>
+                  <th class="column6">Long</th>
+                </tr>
+              </thead>
+              <tbody id="data">
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    function getCafes() {
+
+      let ourRequestCafes = new XMLHttpRequest();
+      ourRequestCafes.open('GET', 'https://raw.githubusercontent.com/debojyoti/places-fake-rest-api/master/cafes.json', true);
+      ourRequestCafes.onload = function cafes() {
+        var cafes = JSON.parse(ourRequestCafes.responseText);
+        getPlaces(cafes);
+      }
+      ourRequestCafes.send();
+    }
+    function getPlaces(cafes) {
+
+      let ourRequestPlaces = new XMLHttpRequest();
+      ourRequestPlaces.open('GET', 'https://raw.githubusercontent.com/debojyoti/places-fake-rest-api/master/places.json', true);
+      ourRequestPlaces.onload = function () {
+        var places = JSON.parse(ourRequestPlaces.responseText);
+        merge(cafes, places);
+      }
+      ourRequestPlaces.send();
+    }
+    function merge(cafes, places) {
+
+      var cafe = cafes.cafes;
+      var place = places.places;
+      var object = {};
+      var array = [];
+      var k = 1;
+      var temp = "";
+      // console.log(cafe);
+      //console.log(place);
+
+      for (let i = 0; i < cafe.length; i++) {
+        //console.log(cafe[i].location_id);
+
+        for (let j = 0; j < place.length; j++) {
+
+          //console.log(cafe[i].location_id.localeCompare(place[j].id));
+          if (cafe[i].location_id.localeCompare(place[j].id) === 0) {
+            object = {
+              "id": k++,
+              "name": cafe[i].name,
+              "locality": place[j].locality,
+              "postal_code": place[j].postal_code,
+              "long": place[j].long,
+              "lat": place[j].lat
+            };
+            console.log(object);
+            array.push(object);
+          }
+        }
+      }
+      array.forEach(element => {
+
+        temp += "<tr>";
+        temp += "<td>" + element.id + "</td>";
+        temp += "<td>" + element.name + "</td>";
+        temp += "<td>" + element.locality + "</td>";
+        temp += "<td>" + element.postal_code + "</td>";
+        temp += "<td>" + element.long + "</td>";
+        temp += "<td>" + element.lat + "</td>";
+      });
+
+      document.getElementById('data').innerHTML = temp;
+    }
+    function search(){
+
+      var dataFilter = document.getElementById('input').value.toUpperCase();
+
+      var myTableData = document.getElementById('data');
+
+      var tableRow = myTableData.getElementsByTagName('tr');
+      
+      for(let i=0;i<tableRow.length;i++){
+        var td = tableRow[i].getElementsByTagName('td')[1];
+
+        if(td){
+
+          let textValue = td.textContent || td.innerHTML;
+          if(textValue.toUpperCase().indexOf(dataFilter) > -1){
+            tableRow[i].style.display = "";
+          } else {
+            tableRow[i].style.display = "none";
+          }
+        }
+      }
+    }
+    getCafes();
+  </script>
+</body>
+
+</html>
